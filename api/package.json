@@ -8,10 +8,10 @@
     "private": true,
     "repository": {
         "type": "git",
-        "url": "https://github.com/argoroots/Entu"
+        "url": "https://github.com/argoroots/Entu/tree/mongo"
     },
     "bugs": {
-        "url": "https://github.com/argoroots/Entu/issues"
+        "url": "https://github.com/argoroots/Entu/issues?milestone=1"
     },
     "dependencies": {
         "async": "*",
