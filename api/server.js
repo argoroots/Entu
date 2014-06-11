@@ -1,7 +1,10 @@
+#!/usr/bin/env nodejs
+
 require('newrelic')
 
 var _e      = require('./app/helper')
 
+var nomnom  = require('nomnom')
 var express = require('express')
 var session = require('cookie-session')
 
@@ -9,6 +12,23 @@ var session = require('cookie-session')
 
 var entity  = require('./app/entity')
 var user    = require('./app/user')
+
+
+
+var opts = nomnom.options({
+    port: {
+        abbr     : 'p',
+        metavar  : 'PORT',
+        required : true,
+        help     : 'Entu API server will listen this port'
+    },
+    mongodb: {
+        abbr     : 'm',
+        metavar  : 'STRING',
+        required : true,
+        help     : 'MongoDB connection string'
+    },
+}).parse()
 
 
 
@@ -26,8 +46,12 @@ express()
     .get('/auth/:provider', user.oauth2)
     .get('*', function(req, res) { res.json(404, {error: '404'}) })
 
-    .listen(80)
+    .listen(parseInt(opts.port))
 
 
 
-_e.log('ready to serve')
+process.on('uncaughtException', function(err) { _e.error(err) })
+
+
+
+_e.log('node ' + process.version + ' is ready to serve on port ' + opts.port)

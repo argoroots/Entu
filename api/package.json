@@ -1,27 +1,29 @@
 {
-    "name": "Entu",
-    "description": "Futuristic Data Management System",
-    "version": "0.0.1",
-    "author": "Argo Roots",
-    "main": "server.js",
-    "license": "MIT",
-    "private": true,
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/argoroots/Entu/tree/mongo"
-    },
-    "bugs": {
-        "url": "https://github.com/argoroots/Entu/issues?milestone=1"
-    },
-    "dependencies": {
-        "async": "*",
-        "cookie-session": "*",
-        "crypto": "*",
-        "express": "*",
-        "mongodb": "*",
-        "newrelic": "*",
-        "querystring": "*",
-        "request": "*",
-        "underscore": "*"
-    }
+  "name": "Entu",
+  "description": "Futuristic Data Management System",
+  "version": "0.0.1",
+  "author": "Argo Roots",
+  "main": "server.js",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argoroots/Entu/tree/mongo"
+  },
+  "bugs": {
+    "url": "https://github.com/argoroots/Entu/issues?milestone=1"
+  },
+  "dependencies": {
+    "async": "*",
+    "cookie-session": "*",
+    "crypto": "*",
+    "express": "*",
+    "mongodb": "*",
+    "newrelic": "*",
+    "nomnom": "*"
+    "querystring": "*",
+    "request": "*",
+    "underscore": "*",
+    "util": "*",
+  }
 }

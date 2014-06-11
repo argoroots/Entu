@@ -1,5 +1,6 @@
 var _u = require('underscore')
 
+var util = require('util')
 var async = require('async')
 var mongo = require('mongodb')
 var crypto = require('crypto')
@@ -12,7 +13,15 @@ var dbs = {}
 
 exports.log = log
 function log(data) {
-    console.log(data)
+    console.log(new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' - ' + data)
+}
+
+
+
+exports.error = error
+function error(err) {
+    if(util.isError(err)) err = err.stack
+    console.error(new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' - ' + err)
 }
 
 
@@ -29,7 +38,7 @@ function id(id) {
     try {
         return new mongo.BSONPure.ObjectID(id)
     } catch(err) {
-        return
+
     }
 }
 
