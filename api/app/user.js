@@ -102,31 +102,35 @@ exports.oauth2 = function(req, res) {
                 return callback(null)
             },
             function(callback) {
-                _e.collection(req.host, 'entity', callback)
+                _e.db(req.host, callback)
             },
-            function(collection, callback) {
-                // collection.findOne({'property.entu-user': user.id + '@' + user.provider}, callback)
-                collection.findOne({'property.user': user.email}, {'_id': true}, callback)
+            function(db, callback) {
+                // db.collection('entity').findOne({'property.entu-user': user.id + '@' + user.provider}, callback)
+                db.collection('entity').findOne({'property.user': user.email}, {'_id': true}, callback)
             },
             function(item, callback) {
                 if(!item) return callback(new Error('No match for ' + user.email))
 
+                var session_key = _e.random(32)
+
                 user.entity   = item._id
                 user.ip       = req.headers['x-real-ip']
                 user.browser  = req.headers['user-agent']
-                user.session  = _e.random(32)
+                user.session  = session_key
                 user.browser_hash = browser_hash(req)
                 user.login_dt = new Date()
 
-                req.session.key = user.session
+                req.session.key = null
+                req.session.key = session_key
+
 
                 return callback(null)
             },
             function(callback) {
-                _e.collection(req.host, 'session', callback)
+                _e.db(req.host, callback)
             },
-            function(collection, callback) {
-                collection.insert(user, callback)
+            function(db, callback) {
+                db.collection('session').insert(user, callback)
             },
         ], function(err, item) {
             if(err) return res.json(500, { error: err.message })
@@ -134,7 +138,7 @@ exports.oauth2 = function(req, res) {
             res.redirect('/user')
         })
     } else {
-        var query = {
+        res.redirect(provider.url.auth + '?' + querystring.stringify({
             response_type   : 'code',
             client_id       : _e.get_preferences(req.host, provider_name + '_id'),
             redirect_uri    : req.protocol + '://' + req.host + req.path,
@@ -142,8 +146,7 @@ exports.oauth2 = function(req, res) {
             state           : _e.random(8),
             approval_prompt : 'auto',
             access_type     : 'online',
-        }
-        res.redirect(provider.url.auth + '?' + querystring.stringify(query))
+        }))
     }
 }
 
@@ -163,18 +166,18 @@ exports.user = function(req, res) {
 
     async.waterfall([
         function(callback) {
-            _e.collection(req.host, 'session', callback)
+            _e.db(req.host, callback)
         },
-        function(collection, callback) {
-            collection.findOne({'session': req.session.key, 'browser_hash': browser_hash(req)}, {'entity': true}, callback)
+        function(db, callback) {
+            db.collection('session').findOne({'session': req.session.key, 'browser_hash': browser_hash(req)}, {'entity': true}, callback)
         },
         function(session, callback) {
             if(!session) return callback(new Error('No session'))
             entity_id = session.entity
-            _e.collection(req.host, 'entity', callback)
+            _e.db(req.host, callback)
         },
-        function(collection, callback) {
-            collection.findOne({'_id': entity_id}, callback)
+        function(db, callback) {
+            db.collection('entity').findOne({'_id': entity_id}, callback)
         },
     ], function(err, item) {
         if(err) return res.json(500, { error: err.message })

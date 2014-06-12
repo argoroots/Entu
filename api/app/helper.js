@@ -74,24 +74,6 @@ function db(host, cb) {
 
 
 
-// Returns MongoDB collection object for quering/edit to hosts database
-exports.collection = collection
-function collection(host, collection, cb) {
-    async.waterfall([
-        function(callback) {
-            db(host, callback)
-        },
-        function(conn, callback) {
-            conn.collection(collection, callback)
-        },
-    ], function(err, collection, callback) {
-        if(err) return cb(err)
-        return cb(null, collection)
-    })
-}
-
-
-
 // Returns hosts confiquration
 exports.get_preferences = get_preferences
 function get_preferences(host, key) {
