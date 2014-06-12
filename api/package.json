@@ -20,10 +20,10 @@
     "express": "*",
     "mongodb": "*",
     "newrelic": "*",
-    "nomnom": "*"
+    "nomnom": "*",
     "querystring": "*",
     "request": "*",
     "underscore": "*",
-    "util": "*",
+    "util": "*"
   }
 }

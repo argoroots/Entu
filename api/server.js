@@ -1,4 +1,4 @@
-#!/usr/bin/env nodejs
+#!/usr/bin/env node
 
 require('newrelic')
 
@@ -39,10 +39,14 @@ express()
         maxage: 1000 * 60 * 60 * 24 * 14,
         secret: _e.random(16),
     }))
+    // .use(function(req, res) {
+    //     _e.log(opts.port + ' ' + req.path)
+    // })
 
     .get('/entity', entity.list)
     .get('/entity/:id', entity.get)
     .get('/user', user.user)
+    // .get('/auth/exit', user.logout)
     .get('/auth/:provider', user.oauth2)
     .get('*', function(req, res) { res.json(404, {error: '404'}) })
 
@@ -50,7 +54,7 @@ express()
 
 
 
-process.on('uncaughtException', function(err) { _e.error(err) })
+process.on('uncaughtException', _e.error)
 
 
 

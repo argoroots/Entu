@@ -37,18 +37,19 @@ exports.list = function(req, res) {
         _u.each(_u.uniq(req.query.query.toLowerCase().split(' ')), function(s) {
             q.push(new RegExp(s, 'i'))
         })
-        query['_search.et'] = {'$all': q}
-    } else {
-        query['definition'] = 'book'
-        query['_search.et'] = _e.random(_u.random(2, 6))
+        query['search.et'] = {'$all': q}
     }
+    // query['viewer'] = _e.id('539341ee4a8cc32b377a1dfb')
 
     async.waterfall([
         function(callback) {
             _e.collection(req.host, 'entity', callback)
         },
         function(collection, callback) {
-            async.parallel({
+            async.series({
+                // explain: function(callback) {
+                //     collection.find(query).skip(skip).limit(limit).explain(callback)
+                // },
                 count: function(callback) {
                     collection.find(query).count(callback)
                 },
@@ -59,10 +60,11 @@ exports.list = function(req, res) {
                 if(err) return res.json(500, { error: err.message })
 
                 res.json({
+                    explain: results.explain,
                     count: results.count,
                     skip: skip,
                     limit: limit,
-                    result: results.items,
+                    // result: results.items,
                 })
             })
         },
