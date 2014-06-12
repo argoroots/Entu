@@ -7,6 +7,7 @@ var querystring = require('querystring')
 
 
 
+// Oauth2 providers
 var providers = {
     google: {
         url: {
@@ -63,12 +64,14 @@ var providers = {
 
 
 
-function session_key(req) {
-    return _e.md5(req.headers['x-real-ip'] + req.headers['x-real-ip'])
+// Generate browser (user agent + ip) hash
+function browser_hash(req) {
+    return _e.md5(req.headers['user-agent'] + req.headers['x-real-ip'])
 }
 
 
 
+// Redirect to provaider authentication page or authenticate user using provider info
 exports.oauth2 = function(req, res) {
     var provider_name = req.params.provider
     if(!_u.has(providers, provider_name)) return res.json(400, {'error': 'You can\'t login with this provider'})
@@ -112,7 +115,7 @@ exports.oauth2 = function(req, res) {
                 user.ip       = req.headers['x-real-ip']
                 user.browser  = req.headers['user-agent']
                 user.session  = _e.random(32)
-                user.key      = session_key(req)
+                user.browser_hash = browser_hash(req)
                 user.login_dt = new Date()
 
                 req.session.key = user.session
@@ -146,6 +149,7 @@ exports.oauth2 = function(req, res) {
 
 
 
+// Destroy user session
 exports.logout = function(req, res) {
     req.session = null
     res.json({ result: true })
@@ -153,6 +157,7 @@ exports.logout = function(req, res) {
 
 
 
+// Return authenticated users entity
 exports.user = function(req, res) {
     var entity_id = null
 
@@ -161,7 +166,7 @@ exports.user = function(req, res) {
             _e.collection(req.host, 'session', callback)
         },
         function(collection, callback) {
-            collection.findOne({'session': req.session.key, 'key': session_key(req)}, {'entity': true}, callback)
+            collection.findOne({'session': req.session.key, 'browser_hash': browser_hash(req)}, {'entity': true}, callback)
         },
         function(session, callback) {
             if(!session) return callback(new Error('No session'))

@@ -5,8 +5,9 @@ var async = require('async')
 
 
 
+// Return one entity with given id
 exports.get = function(req, res) {
-    var id = _e.id(req.params.id)
+    var id = _e.object_id(req.params.id)
     if(!id) return res.json(404, { error: 'There is no entity with id ' + req.params.id })
 
     async.waterfall([
@@ -26,6 +27,7 @@ exports.get = function(req, res) {
 
 
 
+//Return list of entities
 exports.list = function(req, res) {
     var query = {}
     var limit = parseInt(req.query.limit) ? parseInt(req.query.limit) : 100
@@ -39,7 +41,11 @@ exports.list = function(req, res) {
         })
         query['search.et'] = {'$all': q}
     }
-    // query['viewer'] = _e.id('539341ee4a8cc32b377a1dfb')
+    // query['viewer'] = _e.object_id('539341ee4a8cc32b377a1dfb')
+
+    user.user_id(req, function(id) {
+        _e.log(id)
+    })
 
     async.waterfall([
         function(callback) {

@@ -8,13 +8,12 @@ var nomnom  = require('nomnom')
 var express = require('express')
 var session = require('cookie-session')
 
-
-
 var entity  = require('./app/entity')
 var user    = require('./app/user')
 
 
 
+// Parse (and require) commandline arguments
 var opts = nomnom.options({
     port: {
         abbr     : 'p',
@@ -32,6 +31,7 @@ var opts = nomnom.options({
 
 
 
+// Map routes and start server
 express()
     .use(session({
         name: 'entu',
@@ -54,6 +54,7 @@ express()
 
 
 
+// Log all uncaught errors
 process.on('uncaughtException', _e.error)
 
 
