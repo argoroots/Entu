@@ -4,8 +4,9 @@ require('newrelic')
 
 var _e      = require('./app/helper')
 
-var nomnom  = require('nomnom')
+var async   = require('async')
 var express = require('express')
+var nomnom  = require('nomnom')
 var session = require('cookie-session')
 
 var entity  = require('./app/entity')
@@ -33,20 +34,41 @@ var opts = nomnom.options({
 
 // Map routes and start server
 express()
-    .use(session({
+    .use(session({  // Start new cookie-session
         name: 'entu',
         keys: [_e.random(8), _e.random(8)],
         maxage: 1000 * 60 * 60 * 24 * 14,
         secret: _e.random(16),
     }))
-    // .use(function(req, res) {
-    //     _e.log(opts.port + ' ' + req.path)
-    // })
+    .use(function(req, res, next) { // Save request info to request collection
+        async.waterfall([
+            function(callback) {
+                _e.db(req.host, callback)
+            },
+            function(db, callback) {
+                db.collection('request').insert({
+                    date     : new Date(),
+                    ip       : req.headers['x-real-ip'],
+                    port     : opts.port,
+                    method   : req.method,
+                    protocol : req.protocol,
+                    host     : req.host,
+                    path     : req.path,
+                    query    : req.query,
+                    body     : req.body,
+                    browser  : req.headers['user-agent'],
+                }, callback)
+            },
+        ], function(err, item) {
+            if(err) return res.json(500, { error: err.message })
+            next()
+        })
+    })
 
     .get('/entity', entity.list)
     .get('/entity/:id', entity.get)
     .get('/user', user.user)
-    // .get('/auth/exit', user.logout)
+    .get('/auth/exit', user.logout)
     .get('/auth/:provider', user.oauth2)
     .get('*', function(req, res) { res.json(404, {error: '404'}) })
 
