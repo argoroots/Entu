@@ -3,12 +3,14 @@ var _u = require('underscore')
 
 var async = require('async')
 
+var user = require('./user')
+
 
 
 // Return one entity with given id
 exports.get = function(req, res) {
     var id = _e.object_id(req.params.id)
-    if(!id) return res.json(404, { error: 'There is no entity with id ' + req.params.id })
+    if(!id) return res.json(404, { error: 'There is no entity ' + req.params.id })
 
     async.waterfall([
         function(callback) {
@@ -21,7 +23,15 @@ exports.get = function(req, res) {
         if(err) return res.json(500, { error: err.message })
         if(!item) return res.json(404, { error: 'There is no entity with id ' + req.params.id })
 
-        res.json({ result: item })
+        if(item.sharing === 'public') return res.json({ result: item })
+
+        user.user_id(req, function(err, entity_id) {
+            if(err || !entity_id || (item.sharing === 'private' && !_.contains(item.viewer, entity_id))) {
+                return res.json(403, { error: 'No rights to view entity ' + req.params.id })
+            } else {
+                return res.json({ result: item })
+            }
+        })
     })
 }
 
@@ -41,10 +51,17 @@ exports.list = function(req, res) {
         })
         query['search.et'] = {'$all': q}
     }
-    // query['viewer'] = _e.object_id('539341ee4a8cc32b377a1dfb')
 
     async.waterfall([
         function(callback) {
+            user.user_id(req, callback)
+        },
+        function(user_id, callback) {
+            if(user_id) {
+                query['$or'] = [{viewer: user_id}, {sharing: {'$in': ['public', 'domain']}}]
+            } else {
+                query['sharing'] = 'public'
+            }
             _e.db(req.host, callback)
         },
         function(db, callback) {
@@ -62,11 +79,12 @@ exports.list = function(req, res) {
                 if(err) return res.json(500, { error: err.message })
 
                 res.json({
-                    explain: results.explain,
-                    count: results.count,
+                    query: query,
                     skip: skip,
                     limit: limit,
-                    // result: results.items,
+                    count: results.count,
+                    explain: results.explain,
+                    result: results.items,
                 })
             })
         },

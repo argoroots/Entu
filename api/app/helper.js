@@ -1,9 +1,9 @@
 var _u = require('underscore')
 
-var util = require('util')
-var async = require('async')
-var mongo = require('mongodb')
+var async  = require('async')
 var crypto = require('crypto')
+var mongo  = require('mongodb')
+var util   = require('util')
 
 
 
@@ -55,21 +55,23 @@ function md5(data) {
 }
 
 
+exports.uri = uri
+function uri(req) {
+    return req.protocol + '://' + req.host + req.path
+}
+
+
 
 // Returns MongoDB database connection to hosts database
 exports.db = db
-function db(host, cb) {
-    if(_u.has(dbs, host)) return cb(null, dbs[host])
-    try {
-        mongo.MongoClient.connect(get_preferences(host, 'mongodb'), {server: {auto_reconnect: true}}, function(err, connection) {
-            if(err) return cb(err)
-            log(host + ' connected to mongodb')
-            dbs[host] = connection
-            return cb(err, connection)
-        })
-    } catch(err) {
-        return cb(err)
-    }
+function db(host, callback) {
+    if(_u.has(dbs, host)) return callback(null, dbs[host])
+    mongo.MongoClient.connect(get_preferences(host, 'mongodb'), {server: {auto_reconnect: true}}, function(err, connection) {
+        if(err) return callback(err)
+        log(host + ' connected to mongodb')
+        dbs[host] = connection
+        return callback(null, connection)
+    })
 }
 
 

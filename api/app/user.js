@@ -1,9 +1,9 @@
-var _e  = require('./helper')
+var _e = require('./helper')
 var _u = require('underscore')
 
-var async = require('async')
-var request = require('request')
+var async       = require('async')
 var querystring = require('querystring')
+var request     = require('request')
 
 
 
@@ -86,7 +86,7 @@ exports.oauth2 = function(req, res) {
                     code          : req.query.code,
                     client_id     : _e.get_preferences(req.host, provider_name + '_id'),
                     client_secret : _e.get_preferences(req.host, provider_name + '_secret'),
-                    redirect_uri  : req.protocol + '://' + req.host + req.path,
+                    redirect_uri  : _e.uri(req),
                     grant_type    : 'authorization_code',
                 }}, callback)
             },
@@ -141,7 +141,7 @@ exports.oauth2 = function(req, res) {
         res.redirect(provider.url.auth + '?' + querystring.stringify({
             response_type   : 'code',
             client_id       : _e.get_preferences(req.host, provider_name + '_id'),
-            redirect_uri    : req.protocol + '://' + req.host + req.path,
+            redirect_uri    : _e.uri(req),
             scope           : provider.scope,
             state           : _e.random(8),
             approval_prompt : 'auto',
@@ -166,14 +166,10 @@ exports.user = function(req, res) {
 
     async.waterfall([
         function(callback) {
-            _e.db(req.host, callback)
+            user_id(req, callback)
         },
-        function(db, callback) {
-            db.collection('session').findOne({'session': req.session.key, 'browser_hash': browser_hash(req)}, {'entity': true}, callback)
-        },
-        function(session, callback) {
-            if(!session) return callback(new Error('No session'))
-            entity_id = session.entity
+        function(user, callback) {
+            entity_id = user
             _e.db(req.host, callback)
         },
         function(db, callback) {
@@ -184,5 +180,24 @@ exports.user = function(req, res) {
         if(!item) return res.json(404, { error: 'There is no user' })
 
         res.json({ result: item })
+    })
+}
+
+
+
+// Return authenticated users id
+exports.user_id = user_id
+function user_id(req, cb) {
+    async.waterfall([
+        function(callback) {
+            _e.db(req.host, callback)
+        },
+        function(db, callback) {
+            db.collection('session').findOne({'session': req.session.key, 'browser_hash': browser_hash(req)}, {'entity': true}, callback)
+        },
+    ], function(err, session) {
+        if(err) return cb(err)
+        if(!session) return cb(null, null)
+        return cb(null, session.entity)
     })
 }
