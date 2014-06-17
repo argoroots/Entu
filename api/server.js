@@ -60,27 +60,20 @@ express()
     .use(function(req, res, next) { // Save request info to request collection
         var start = Date.now()
         res.on('finish', function() {
-            async.waterfall([
-                function(callback) {
-                    _e.db(req.host, callback)
-                },
-                function(db, callback) {
-                    db.collection('request').insert({
-                        date     : new Date(),
-                        ip       : req.headers['x-real-ip'],
-                        duration : Date.now() - start,
-                        status   : res.statusCode,
-                        port     : opts.port,
-                        method   : req.method,
-                        protocol : req.protocol,
-                        host     : req.host,
-                        path     : req.path,
-                        query    : req.query,
-                        body     : req.body,
-                        browser  : req.headers['user-agent'],
-                    }, callback)
-                },
-            ], function(err, item) {
+            req.entu.db.collection('request').insert({
+                date     : new Date(),
+                ip       : req.headers['x-real-ip'],
+                duration : Date.now() - start,
+                status   : res.statusCode,
+                port     : opts.port,
+                method   : req.method,
+                protocol : req.protocol,
+                host     : req.host,
+                path     : req.path,
+                query    : req.query,
+                body     : req.body,
+                browser  : req.headers['user-agent'],
+            }, function(err, item) {
                 if(err) _e.error(err)
             })
         })
@@ -104,6 +97,13 @@ express()
                 })
             })
         }
+    })
+    .use(function(req, res, next) { // Set authenticated users id to request
+        req.entu.db.collection('session').findOne({'session': req.session.key, 'browser_hash': _e.browser_hash(req)}, {'entity': true}, function(err, session) {
+            if(err) _e.error(err)
+            if(!err && session) req.entu.user = session.entity
+            next()
+        })
     })
 
     .get('/entity', entity.list)

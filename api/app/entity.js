@@ -12,11 +12,7 @@ exports.get = function(req, res) {
     var id = _e.object_id(req.params.id)
     if(!id) return res.json(404, { error: 'There is no entity ' + req.params.id })
 
-    async.waterfall([
-        function(callback) {
-            req.entu.db.collection('entity').findOne({'_id': id}, callback)
-        },
-    ], function(err, item) {
+    req.entu.db.collection('entity').findOne({'_id': id}, function(err, item) {
         if(err) return res.json(500, { error: err.message })
         if(!item) return res.json(404, { error: 'There is no entity with id ' + req.params.id })
 

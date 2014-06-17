@@ -7,10 +7,6 @@ var util   = require('util')
 
 
 
-var dbs = {}
-
-
-
 // Send message (with timestamp) to stdout
 exports.log = log
 function log(data) {
@@ -56,7 +52,16 @@ function md5(data) {
 
 
 
+// Get full uri
 exports.uri = uri
 function uri(req) {
     return req.protocol + '://' + req.host + req.path
+}
+
+
+
+// Generate browser (user agent + ip) hash
+exports.browser_hash = browser_hash
+function browser_hash(req) {
+    return md5(req.headers['user-agent'] + req.headers['x-real-ip'])
 }

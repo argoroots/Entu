@@ -64,13 +64,6 @@ var providers = {
 
 
 
-// Generate browser (user agent + ip) hash
-function browser_hash(req) {
-    return _e.md5(req.headers['user-agent'] + req.headers['x-real-ip'])
-}
-
-
-
 // Redirect to provaider authentication page or authenticate user using provider info
 exports.oauth2 = function(req, res) {
     var provider_name = req.params.provider
@@ -114,7 +107,7 @@ exports.oauth2 = function(req, res) {
                 user.ip       = req.headers['x-real-ip']
                 user.browser  = req.headers['user-agent']
                 user.session  = session_key
-                user.browser_hash = browser_hash(req)
+                user.browser_hash = _e.browser_hash(req)
                 user.login_dt = new Date()
 
                 req.session.key = null
@@ -156,35 +149,10 @@ exports.logout = function(req, res) {
 
 // Return authenticated users entity
 exports.user = function(req, res) {
-    _e.log(req.customers)
-
-    async.waterfall([
-        function(callback) {
-            user_id(req, callback)
-        },
-        function(user, callback) {
-            req.entu.db.collection('entity').findOne({'_id': user}, callback)
-        },
-    ], function(err, item) {
+    req.entu.db.collection('entity').findOne({'_id': req.entu.user}, function(err, item) {
         if(err) return res.json(500, { error: err.message })
-        if(!item) return res.json(404, { error: 'There is no user' })
+        if(!item) return res.json(404, { error: 'No authenticated user' })
 
         res.json({ result: item })
-    })
-}
-
-
-
-// Return authenticated users id
-exports.user_id = user_id
-function user_id(req, cb) {
-    async.waterfall([
-        function(callback) {
-            req.entu.db.collection('session').findOne({'session': req.session.key, 'browser_hash': browser_hash(req)}, {'entity': true}, callback)
-        },
-    ], function(err, session) {
-        if(err) return cb(err)
-        if(!session) return cb(null, null)
-        return cb(null, session.entity)
     })
 }
