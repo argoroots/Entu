@@ -4,3 +4,4 @@ newrelic
 *.log
 *.yaml
 *.sh
+*.conf
