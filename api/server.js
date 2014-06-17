@@ -41,28 +41,33 @@ express()
         secret: _e.random(16),
     }))
     .use(function(req, res, next) { // Save request info to request collection
-        async.waterfall([
-            function(callback) {
-                _e.db(req.host, callback)
-            },
-            function(db, callback) {
-                db.collection('request').insert({
-                    date     : new Date(),
-                    ip       : req.headers['x-real-ip'],
-                    port     : opts.port,
-                    method   : req.method,
-                    protocol : req.protocol,
-                    host     : req.host,
-                    path     : req.path,
-                    query    : req.query,
-                    body     : req.body,
-                    browser  : req.headers['user-agent'],
-                }, callback)
-            },
-        ], function(err, item) {
-            if(err) return res.json(500, { error: err.message })
-            next()
+        var start = Date.now()
+        res.on('finish', function() {
+            async.waterfall([
+                function(callback) {
+                    _e.db(req.host, callback)
+                },
+                function(db, callback) {
+                    db.collection('request').insert({
+                        date     : new Date(),
+                        ip       : req.headers['x-real-ip'],
+                        duration : Date.now() - start,
+                        status   : res.statusCode,
+                        port     : opts.port,
+                        method   : req.method,
+                        protocol : req.protocol,
+                        host     : req.host,
+                        path     : req.path,
+                        query    : req.query,
+                        body     : req.body,
+                        browser  : req.headers['user-agent'],
+                    }, callback)
+                },
+            ], function(err, item) {
+                if(err) _e.error(err)
+            })
         })
+        next()
     })
 
     .get('/entity', entity.list)
