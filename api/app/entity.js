@@ -18,13 +18,11 @@ exports.get = function(req, res) {
 
         if(item.sharing === 'public') return res.json({ result: item })
 
-        user.user_id(req, function(err, entity_id) {
-            if(err || !entity_id || (item.sharing === 'private' && !_.contains(item.viewer, entity_id))) {
-                return res.json(403, { error: 'No rights to view entity ' + req.params.id })
-            } else {
-                return res.json({ result: item })
-            }
-        })
+        if(err || !req.entu.user || (item.sharing === 'private' && !_.contains(item.viewer, req.entu.user))) {
+            return res.json(403, { error: 'No rights to view entity ' + req.params.id })
+        } else {
+            return res.json({ result: item })
+        }
     })
 }
 
@@ -44,42 +42,32 @@ exports.list = function(req, res) {
         })
         query['search.et'] = {'$all': q}
     }
+    if(req.entu.user) {
+        query['$or'] = [{viewer: req.entu.user}, {sharing: {'$in': ['public', 'domain']}}]
+    } else {
+        query['sharing'] = 'public'
+    }
 
-    async.waterfall([
-        function(callback) {
-            user.user_id(req, callback)
+    async.series({
+        explain: function(callback) {
+            req.entu.db.collection('entity').find(query).skip(skip).limit(limit).explain(callback)
         },
-        function(user_id, callback) {
-            if(user_id) {
-                query['$or'] = [{viewer: user_id}, {sharing: {'$in': ['public', 'domain']}}]
-            } else {
-                query['sharing'] = 'public'
-            }
-            return callback(null)
+        count: function(callback) {
+            req.entu.db.collection('entity').find(query).count(callback)
         },
-        function(callback) {
-            async.series({
-                explain: function(callback) {
-                    req.entu.db.collection('entity').find(query).skip(skip).limit(limit).explain(callback)
-                },
-                count: function(callback) {
-                    req.entu.db.collection('entity').find(query).count(callback)
-                },
-                items: function(callback) {
-                    req.entu.db.collection('entity').find(query).skip(skip).limit(limit).toArray(callback)
-                },
-            }, function(err, results) {
-                if(err) return res.json(500, { error: err.message })
+        items: function(callback) {
+            req.entu.db.collection('entity').find(query).skip(skip).limit(limit).toArray(callback)
+        },
+    }, function(err, results) {
+        if(err) return res.json(500, { error: err.message })
 
-                res.json({
-                    query: query,
-                    skip: skip,
-                    limit: limit,
-                    count: results.count,
-                    explain: results.explain,
-                    result: results.items,
-                })
-            })
-        },
-    ])
+        res.json({
+            query: query,
+            skip: skip,
+            limit: limit,
+            count: results.count,
+            explain: results.explain,
+            result: results.items,
+        })
+    })
 }

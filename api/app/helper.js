@@ -1,6 +1,5 @@
 var _u = require('underscore')
 
-var async  = require('async')
 var crypto = require('crypto')
 var mongo  = require('mongodb')
 var util   = require('util')
