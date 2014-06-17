@@ -55,42 +55,8 @@ function md5(data) {
 }
 
 
+
 exports.uri = uri
 function uri(req) {
     return req.protocol + '://' + req.host + req.path
-}
-
-
-
-// Returns MongoDB database connection to hosts database
-exports.db = db
-function db(host, callback) {
-    if(_u.has(dbs, host)) return callback(null, dbs[host])
-    mongo.MongoClient.connect(get_preferences(host, 'mongodb'), {server: {auto_reconnect: true}}, function(err, connection) {
-        if(err) return callback(err)
-        log(host + ' connected to mongodb')
-        dbs[host] = connection
-        return callback(null, connection)
-    })
-}
-
-
-
-// Returns hosts confiquration
-exports.get_preferences = get_preferences
-function get_preferences(host, key) {
-    var prefs = {
-        'mongo.entu.ee': {
-            mongodb         : '',
-            google_id       : '',
-            google_secret   : '',
-            facebook_id     : '',
-            facebook_secret : '',
-            live_id         : '',
-            live_secret     : '',
-        },
-
-    }
-
-    return prefs[host][key]
 }

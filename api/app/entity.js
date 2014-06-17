@@ -14,10 +14,7 @@ exports.get = function(req, res) {
 
     async.waterfall([
         function(callback) {
-            _e.db(req.host, callback)
-        },
-        function(db, callback) {
-            db.collection('entity').findOne({'_id': id}, callback)
+            req.entu.db.collection('entity').findOne({'_id': id}, callback)
         },
     ], function(err, item) {
         if(err) return res.json(500, { error: err.message })
@@ -62,18 +59,18 @@ exports.list = function(req, res) {
             } else {
                 query['sharing'] = 'public'
             }
-            _e.db(req.host, callback)
+            return callback(null)
         },
-        function(db, callback) {
+        function(callback) {
             async.series({
                 explain: function(callback) {
-                    db.collection('entity').find(query).skip(skip).limit(limit).explain(callback)
+                    req.entu.db.collection('entity').find(query).skip(skip).limit(limit).explain(callback)
                 },
                 count: function(callback) {
-                    db.collection('entity').find(query).count(callback)
+                    req.entu.db.collection('entity').find(query).count(callback)
                 },
                 items: function(callback) {
-                    db.collection('entity').find(query).skip(skip).limit(limit).toArray(callback)
+                    req.entu.db.collection('entity').find(query).skip(skip).limit(limit).toArray(callback)
                 },
             }, function(err, results) {
                 if(err) return res.json(500, { error: err.message })

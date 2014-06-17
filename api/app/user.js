@@ -84,8 +84,8 @@ exports.oauth2 = function(req, res) {
             function(callback) {
                 request.post(provider.url.token, {form: {
                     code          : req.query.code,
-                    client_id     : _e.get_preferences(req.host, provider_name + '_id'),
-                    client_secret : _e.get_preferences(req.host, provider_name + '_secret'),
+                    client_id     : req.entu.settings[provider_name + '_id'],
+                    client_secret : req.entu.settings[provider_name + '_secret'],
                     redirect_uri  : _e.uri(req),
                     grant_type    : 'authorization_code',
                 }}, callback)
@@ -102,11 +102,8 @@ exports.oauth2 = function(req, res) {
                 return callback(null)
             },
             function(callback) {
-                _e.db(req.host, callback)
-            },
-            function(db, callback) {
-                // db.collection('entity').findOne({'property.entu-user': user.id + '@' + user.provider}, callback)
-                db.collection('entity').findOne({'property.user': user.email}, {'_id': true}, callback)
+                // req.entu.db.collection('entity').findOne({'property.entu-user': user.id + '@' + user.provider}, callback)
+                req.entu.db.collection('entity').findOne({'property.user': user.email}, {'_id': true}, callback)
             },
             function(item, callback) {
                 if(!item) return callback(new Error('No match for ' + user.email))
@@ -127,10 +124,7 @@ exports.oauth2 = function(req, res) {
                 return callback(null)
             },
             function(callback) {
-                _e.db(req.host, callback)
-            },
-            function(db, callback) {
-                db.collection('session').insert(user, callback)
+                req.entu.db.collection('session').insert(user, callback)
             },
         ], function(err, item) {
             if(err) return res.json(500, { error: err.message })
@@ -140,7 +134,7 @@ exports.oauth2 = function(req, res) {
     } else {
         res.redirect(provider.url.auth + '?' + querystring.stringify({
             response_type   : 'code',
-            client_id       : _e.get_preferences(req.host, provider_name + '_id'),
+            client_id       : req.entu.settings[provider_name + '_id'],
             redirect_uri    : _e.uri(req),
             scope           : provider.scope,
             state           : _e.random(8),
@@ -162,18 +156,14 @@ exports.logout = function(req, res) {
 
 // Return authenticated users entity
 exports.user = function(req, res) {
-    var entity_id = null
+    _e.log(req.customers)
 
     async.waterfall([
         function(callback) {
             user_id(req, callback)
         },
         function(user, callback) {
-            entity_id = user
-            _e.db(req.host, callback)
-        },
-        function(db, callback) {
-            db.collection('entity').findOne({'_id': entity_id}, callback)
+            req.entu.db.collection('entity').findOne({'_id': user}, callback)
         },
     ], function(err, item) {
         if(err) return res.json(500, { error: err.message })
@@ -190,10 +180,7 @@ exports.user_id = user_id
 function user_id(req, cb) {
     async.waterfall([
         function(callback) {
-            _e.db(req.host, callback)
-        },
-        function(db, callback) {
-            db.collection('session').findOne({'session': req.session.key, 'browser_hash': browser_hash(req)}, {'entity': true}, callback)
+            req.entu.db.collection('session').findOne({'session': req.session.key, 'browser_hash': browser_hash(req)}, {'entity': true}, callback)
         },
     ], function(err, session) {
         if(err) return cb(err)

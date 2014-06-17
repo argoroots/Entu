@@ -3,9 +3,11 @@
 require('newrelic')
 
 var _e      = require('./app/helper')
+var _u      = require('underscore')
 
 var async   = require('async')
 var express = require('express')
+var mongo   = require('mongodb')
 var nomnom  = require('nomnom')
 var session = require('cookie-session')
 
@@ -29,6 +31,21 @@ var opts = nomnom.options({
         help     : 'MongoDB connection string'
     },
 }).parse()
+
+
+
+// All local variables
+var settings = {}
+var dbs = {}
+var maindb = null
+
+
+
+// Connect to main DB
+mongo.MongoClient.connect(opts.mongodb, {server: {auto_reconnect: true}}, function(err, db) {
+    maindb = db
+    _e.log('connected to ' + opts.mongodb + ' (main DB)')
+})
 
 
 
@@ -69,6 +86,25 @@ express()
         })
         next()
     })
+    .use(function(req, res, next) { // Set customer preferences and DB connection to request
+        req.entu = {}
+        if(_u.has(settings, req.host) && _u.has(dbs, req.host)) {
+            req.entu.settings = settings[req.host]
+            req.entu.db       = dbs[req.host]
+            next()
+        } else {
+            maindb.collection('entity').findOne({'property.domain': req.host}, function(err, item) {
+                if(err) return res.json(500, {error: err.message})
+                if(!item) return res.json(404, {error: 'No domain ' + req.host})
+                mongo.MongoClient.connect(item.property.mongodb[0], {server: {auto_reconnect: true}}, function(err, db) {
+                    req.entu.settings = settings[req.host] = item.property
+                    req.entu.db = dbs[req.host] = db
+                    next()
+                    _e.log('connected to ' + item.property.mongodb)
+                })
+            })
+        }
+    })
 
     .get('/entity', entity.list)
     .get('/entity/:id', entity.get)
@@ -82,7 +118,7 @@ express()
 
 
 // Log all uncaught errors
-process.on('uncaughtException', _e.error)
+// process.on('uncaughtException', _e.error)
 
 
 
