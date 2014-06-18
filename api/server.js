@@ -82,15 +82,22 @@ express()
     .use(function(req, res, next) { // Set customer preferences and DB connection to request
         req.entu = {}
         if(_u.has(settings, req.host) && _u.has(dbs, req.host)) {
-            req.entu.settings = settings[req.host]
-            req.entu.db       = dbs[req.host]
+            req.entu    = settings[req.host]
+            req.entu.db = dbs[req.host]
             next()
         } else {
             maindb.collection('entity').findOne({'property.domain': req.host}, function(err, item) {
                 if(err) return res.json(500, {error: err.message})
                 if(!item) return res.json(404, {error: 'No domain ' + req.host})
                 mongo.MongoClient.connect(item.property.mongodb[0], {server: {auto_reconnect: true}}, function(err, db) {
-                    req.entu.settings = settings[req.host] = item.property
+                    req.entu = settings[req.host] = {
+                        google_id       : item.property['auth-google'][0].split('\n')[0],
+                        google_secret   : item.property['auth-google'][0].split('\n')[1],
+                        facebook_id     : item.property['auth-facebook'][0].split('\n')[0],
+                        facebook_secret : item.property['auth-facebook'][0].split('\n')[1],
+                        live_id         : item.property['auth-live'][0].split('\n')[0],
+                        live_secret     : item.property['auth-live'][0].split('\n')[1],
+                    }
                     req.entu.db = dbs[req.host] = db
                     next()
                     _e.log('connected to ' + item.property.mongodb)

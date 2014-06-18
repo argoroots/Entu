@@ -77,8 +77,8 @@ exports.oauth2 = function(req, res) {
             function(callback) {
                 request.post(provider.url.token, {form: {
                     code          : req.query.code,
-                    client_id     : req.entu.settings[provider_name + '_id'],
-                    client_secret : req.entu.settings[provider_name + '_secret'],
+                    client_id     : req.entu[provider_name + '_id'],
+                    client_secret : req.entu[provider_name + '_secret'],
                     redirect_uri  : _e.uri(req),
                     grant_type    : 'authorization_code',
                 }}, callback)
@@ -127,7 +127,7 @@ exports.oauth2 = function(req, res) {
     } else {
         res.redirect(provider.url.auth + '?' + querystring.stringify({
             response_type   : 'code',
-            client_id       : req.entu.settings[provider_name + '_id'],
+            client_id       : req.entu[provider_name + '_id'],
             redirect_uri    : _e.uri(req),
             scope           : provider.scope,
             state           : _e.random(8),
