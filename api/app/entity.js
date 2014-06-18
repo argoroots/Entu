@@ -12,13 +12,13 @@ exports.get = function(req, res) {
     var id = _e.object_id(req.params.id)
     if(!id) return res.json(404, { error: 'There is no entity ' + req.params.id })
 
-    req.entu.db.collection('entity').findOne({'_id': id}, function(err, item) {
+    req.entu_db.collection('entity').findOne({'_id': id}, function(err, item) {
         if(err) return res.json(500, { error: err.message })
         if(!item) return res.json(404, { error: 'There is no entity with id ' + req.params.id })
 
         if(item.sharing === 'public') return res.json({ result: item })
 
-        if(err || !req.entu.user || (item.sharing === 'private' && !_.contains(item.viewer, req.entu.user))) {
+        if(!req.entu_user || (item.sharing === 'private' && !_u.contains(item.viewer, _e.object_id(req.entu_user)))) {
             return res.json(403, { error: 'No rights to view entity ' + req.params.id })
         } else {
             return res.json({ result: item })
@@ -42,21 +42,21 @@ exports.list = function(req, res) {
         })
         query['search.et'] = {'$all': q}
     }
-    if(req.entu.user) {
-        query['$or'] = [{viewer: req.entu.user}, {sharing: {'$in': ['public', 'domain']}}]
+    if(req.entu_user) {
+        query['$or'] = [{viewer: req.entu_user}, {sharing: {'$in': ['public', 'domain']}}]
     } else {
         query['sharing'] = 'public'
     }
 
     async.series({
         explain: function(callback) {
-            req.entu.db.collection('entity').find(query).skip(skip).limit(limit).explain(callback)
+            req.entu_db.collection('entity').find(query).skip(skip).limit(limit).explain(callback)
         },
         count: function(callback) {
-            req.entu.db.collection('entity').find(query).count(callback)
+            req.entu_db.collection('entity').find(query).count(callback)
         },
         items: function(callback) {
-            req.entu.db.collection('entity').find(query).skip(skip).limit(limit).toArray(callback)
+            req.entu_db.collection('entity').find(query).skip(skip).limit(limit).toArray(callback)
         },
     }, function(err, results) {
         if(err) return res.json(500, { error: err.message })

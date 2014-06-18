@@ -95,13 +95,13 @@ exports.oauth2 = function(req, res) {
                 return callback(null)
             },
             function(callback) {
-                // req.entu.db.collection('entity').findOne({'property.entu-user': user.id + '@' + user.provider}, callback)
-                req.entu.db.collection('entity').findOne({'property.user': user.email}, {'_id': true}, callback)
+                // req.entu_db.collection('entity').findOne({'property.entu-user': user.id + '@' + user.provider}, callback)
+                req.entu_db.collection('entity').findOne({'property.user': user.email}, {'_id': true}, callback)
             },
             function(item, callback) {
                 if(!item) return callback(new Error('No match for ' + user.email))
 
-                var session_key = _e.random(32)
+                var session_key = _e.md5(_e.random(32) + _e.browser_hash(req))
 
                 user.entity   = item._id
                 user.ip       = req.headers['x-real-ip']
@@ -117,7 +117,7 @@ exports.oauth2 = function(req, res) {
                 return callback(null)
             },
             function(callback) {
-                req.entu.db.collection('session').insert(user, callback)
+                req.entu_db.collection('session').insert(user, callback)
             },
         ], function(err, item) {
             if(err) return res.json(500, { error: err.message })
@@ -149,7 +149,7 @@ exports.logout = function(req, res) {
 
 // Return authenticated users entity
 exports.user = function(req, res) {
-    req.entu.db.collection('entity').findOne({'_id': req.entu.user}, function(err, item) {
+    req.entu_db.collection('entity').findOne({'_id': req.entu_user}, function(err, item) {
         if(err) return res.json(500, { error: err.message })
         if(!item) return res.json(404, { error: 'No authenticated user' })
 

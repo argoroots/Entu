@@ -60,7 +60,7 @@ express()
     .use(function(req, res, next) { // Save request info to request collection
         var start = Date.now()
         res.on('finish', function() {
-            req.entu.db.collection('request').insert({
+            req.entu_db.collection('request').insert({
                 date     : new Date(),
                 ip       : req.headers['x-real-ip'],
                 duration : Date.now() - start,
@@ -83,7 +83,7 @@ express()
         req.entu = {}
         if(_u.has(settings, req.host) && _u.has(dbs, req.host)) {
             req.entu    = settings[req.host]
-            req.entu.db = dbs[req.host]
+            req.entu_db = dbs[req.host]
             next()
         } else {
             maindb.collection('entity').findOne({'property.domain': req.host}, function(err, item) {
@@ -98,7 +98,7 @@ express()
                         live_id         : item.property['auth-live'][0].split('\n')[0],
                         live_secret     : item.property['auth-live'][0].split('\n')[1],
                     }
-                    req.entu.db = dbs[req.host] = db
+                    req.entu_db = dbs[req.host] = db
                     next()
                     _e.log('connected to ' + item.property.mongodb)
                 })
@@ -106,9 +106,9 @@ express()
         }
     })
     .use(function(req, res, next) { // Set authenticated users id to request
-        req.entu.db.collection('session').findOne({'session': req.session.key, 'browser_hash': _e.browser_hash(req)}, {'entity': true}, function(err, session) {
+        req.entu_db.collection('session').findOne({'session': req.session.key, 'browser_hash': _e.browser_hash(req)}, {'_id':false, 'entity': true}, function(err, s) {
             if(err) _e.error(err)
-            if(!err && session) req.entu.user = session.entity
+            if(!err && s) req.entu_user = s.entity
             next()
         })
     })
