@@ -18,7 +18,7 @@ exports.get = function(req, res) {
 
         if(item.sharing === 'public') return res.json({ result: item })
 
-        if(!req.entu_user || (item.sharing === 'private' && !_u.contains(item.viewer, _e.object_id(req.entu_user)))) {
+        if(!req.entu_user || (item.sharing === 'private' && !_u.contains(item.viewer, req.entu_user))) {
             return res.json(403, { error: 'No rights to view entity ' + req.params.id })
         } else {
             return res.json({ result: item })
