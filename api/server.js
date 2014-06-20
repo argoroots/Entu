@@ -51,6 +51,7 @@ mongo.MongoClient.connect(opts.mongodb, {server: {auto_reconnect: true}}, functi
 
 // Map routes and start server
 express()
+    .enable('trust proxy')  // Get correct IP from nginx
     .use(session({  // Start new cookie-session
         name: 'entu',
         keys: [_e.random(8), _e.random(8)],
@@ -62,7 +63,7 @@ express()
         res.on('finish', function() {
             req.entu_db.collection('request').insert({
                 date     : new Date(),
-                ip       : req.headers['x-real-ip'],
+                ip       : req.ip,
                 duration : Date.now() - start,
                 status   : res.statusCode,
                 port     : opts.port,

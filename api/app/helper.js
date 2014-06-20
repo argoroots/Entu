@@ -62,5 +62,5 @@ function uri(req) {
 // Generate browser (user agent + ip) hash
 exports.browser_hash = browser_hash
 function browser_hash(req) {
-    return md5(req.headers['user-agent'] + req.headers['x-real-ip'])
+    return md5(req.headers['user-agent'] + req.ip)
 }

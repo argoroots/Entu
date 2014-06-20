@@ -104,7 +104,7 @@ exports.oauth2 = function(req, res) {
                 var session_key = _e.md5(_e.random(32) + _e.browser_hash(req))
 
                 user.entity   = item._id
-                user.ip       = req.headers['x-real-ip']
+                user.ip       = req.ip
                 user.browser  = req.headers['user-agent']
                 user.session  = session_key
                 user.browser_hash = _e.browser_hash(req)
@@ -112,7 +112,6 @@ exports.oauth2 = function(req, res) {
 
                 req.session.key = null
                 req.session.key = session_key
-
 
                 return callback(null)
             },
