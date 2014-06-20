@@ -12,7 +12,11 @@ exports.get = function(req, res) {
     var id = _e.object_id(req.params.id)
     if(!id) return res.json(404, { error: 'There is no entity ' + req.params.id })
 
-    req.entu_db.collection('entity').findOne({'_id': id}, function(err, item) {
+    var fields = req.query.fields ? _u.object(req.query.fields.split(','), _u.map(req.query.fields.split(','), function(field){ return true })) : {}
+    fields['viewer'] = true
+    fields['sharing'] = true
+
+    req.entu_db.collection('entity').findOne({'_id': id}, fields, function(err, item) {
         if(err) return res.json(500, { error: err.message })
         if(!item) return res.json(404, { error: 'There is no entity with id ' + req.params.id })
 
@@ -30,9 +34,12 @@ exports.get = function(req, res) {
 
 //Return list of entities
 exports.list = function(req, res) {
-    var query = {}
-    var limit = parseInt(req.query.limit) ? parseInt(req.query.limit) : 100
-    var skip  = parseInt(req.query.page)  ? (parseInt(req.query.page) - 1) * limit  : 0
+    var query  = {}
+    var fields = req.query.fields ? _u.object(req.query.fields.split(','), _u.map(req.query.fields.split(','), function(field){ return true })) : {}
+    var limit  = parseInt(req.query.limit) ? parseInt(req.query.limit) : 100
+    var skip   = parseInt(req.query.page)  ? (parseInt(req.query.page) - 1) * limit  : 0
+
+    _e.log(JSON.stringify(fields))
 
     if(req.query.definition) query['definition'] = req.query.definition
     if(req.query.query) {
@@ -50,13 +57,13 @@ exports.list = function(req, res) {
 
     async.series({
         explain: function(callback) {
-            req.entu_db.collection('entity').find(query).skip(skip).limit(limit).explain(callback)
+            req.entu_db.collection('entity').find(query, fields).skip(skip).limit(limit).explain(callback)
         },
         count: function(callback) {
-            req.entu_db.collection('entity').find(query).count(callback)
+            req.entu_db.collection('entity').find(query, fields).count(callback)
         },
         items: function(callback) {
-            req.entu_db.collection('entity').find(query).skip(skip).limit(limit).toArray(callback)
+            req.entu_db.collection('entity').find(query, fields).skip(skip).limit(limit).toArray(callback)
         },
     }, function(err, results) {
         if(err) return res.json(500, { error: err.message })
