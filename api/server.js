@@ -11,8 +11,9 @@ var mongo   = require('mongodb')
 var nomnom  = require('nomnom')
 var session = require('cookie-session')
 
-var entity  = require('./app/entity')
-var user    = require('./app/user')
+var entity     = require('./app/entity')
+var definition = require('./app/definition')
+var user       = require('./app/user')
 
 
 
@@ -116,9 +117,13 @@ express()
 
     .get('/entity', entity.list)
     .get('/entity/:id', entity.get)
+
+    .get('/definition', definition.list)
+
     .get('/user', user.user)
     .get('/auth/exit', user.logout)
     .get('/auth/:provider', user.oauth2)
+
     .get('*', function(req, res) { res.json(404, {error: '404'}) })
 
     .listen(parseInt(opts.port))
