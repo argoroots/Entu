@@ -1,0 +1,15 @@
+{
+  "name": "Entu Desktop",
+  "version": "0.0.1",
+  "author": "Argo Roots <argo@roots.ee>",
+  "private": true,
+  "devDependencies": {
+    "angular": "1.*",
+    "angular-i18n": "1.*",
+    "angular-resource": "1.*",
+    "angular-route": "1.*",
+    "angular-sanitize": "1.*",
+    "bootstrap": "3.*",
+    "font-awesome": "4.*"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "Entu Desktop",
+  "version": "0.0.1",
+  "author": "Argo Roots <argo@roots.ee>",
+  "private": true,
+  "dependencies": {
+    "express": "4.4.*",
+    "mysql": "2.3.*"
+  },
+  "devDependencies": {
+    "grunt": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-connect": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-cssmin": "*",
+    "grunt-contrib-jade": "*",
+    "grunt-contrib-less": "*",
+    "grunt-contrib-stylus": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-font-awesome-vars": "*",
+    "grunt-include-replace": "*"
+  }
+}
