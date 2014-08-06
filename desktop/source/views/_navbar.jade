@@ -1,0 +1,45 @@
+nav.navbar.navbar-default.navbar-fixed-top(role='navigation', ng-style='menuStyle("navbar")')
+  ul.nav.navbar-nav.pull-left
+    li
+      a.navbar-button(href='')
+        i.fa.fa-search
+    li
+      input(type='text', class='form-control', placeholder='search something...')
+
+  ul.nav.navbar-nav.pull-right
+    li.dropdown
+      a(href='#', class='navbar-button dropdown-toggle', data-toggle='dropdown')
+        i.fa.fa-plus
+        ul.dropdown-menu
+          li.dropdown-header(role='presentation') Dropdown header
+          li
+            a(href='#') Action
+          li
+            a(href='#') Another action
+          li
+            a(href='#') Something else here
+          li.divider
+          li.dropdown-header(role='presentation') Dropdown header
+          li
+            a(href='#') Separated link
+          li.divider
+          li
+            a(href='#') One more separated link
+    li
+      a.navbar-button(href='')
+        i.fa.fa-pencil
+    li
+      a.navbar-button(href='')
+        i.fa.fa-copy
+    li
+      a.navbar-button(href='')
+        i.fa.fa-arrow-up
+    li
+      a.navbar-button(href='')
+        i.fa.fa-lock
+    li
+      a.navbar-button(href='')
+        i.fa.fa-envelope
+    li
+      a.navbar-button(href='')
+        i.fa.fa-print

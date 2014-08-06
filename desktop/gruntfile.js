@@ -33,9 +33,9 @@ module.exports = function (grunt) {
         },
         jade: {
             html: {
-                // options: {
-                //     pretty: true,
-                // },
+                options: {
+                    // pretty: true,
+                },
                 files: [{
                     expand: true,
                     cwd: 'source/views',

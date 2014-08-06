@@ -1,0 +1,5 @@
+.list-group(ng-controller='listCtrl', ng-style='menuStyle("list")')
+  a.list-group-item(ng-repeat='entity in entities.result', href='#/{{ entity.definition.keyname }}/{{ entity.id }}')
+    img.pull-left.img-circle.img-thumbnail(ng-src='{{ page_url }}/api2/entity-{{ entity.id }}/picture')
+    h4.list-group-item-heading {{ entity.name }}
+    p.list-group-item-text {{ entity.info }}

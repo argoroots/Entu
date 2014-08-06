@@ -1,0 +1,19 @@
+.sidebar(ng-controller='menuCtrl', ng-style='menuStyle("sidebar")', ng-mouseenter='showMenu()', ng-mouseleave='hideMenu()')
+  a.pull-left(href='')
+    i.fa.fa-sign-out
+    | exit
+  a.pull-right(href='', ng-click='pinMenu()')
+    | {{ pin_menu_label }}
+    i.fa.fa-bars
+
+  img.img-circle.img-thumbnail.user-avatar(ng-src='https://lh4.googleusercontent.com/-92eBVB_aFFI/AAAAAAAAAAI/AAAAAAAAkr8/NlClQHPTByA/photo.jpg', alt='...')
+  div
+    ul.nav.nav-sidebar(ng-repeat='(group_id, group) in definitions.result', ng-if='!hide_menu')
+      li.nav-header
+        a(href='', ng-click='toggleMenuGroup(group_id)')
+          i.fa.fa-chevron-right(ng-if='!group.visible')
+          i.fa.fa-chevron-down(ng-if='group.visible')
+          | {{ group.label }}
+
+      li(ng-repeat='definition in group.definitions', ng-show='group.visible == true')
+        a(href='#/{{ definition.keyname }}') {{ definition.label_plural }}
