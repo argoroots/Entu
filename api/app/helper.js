@@ -9,6 +9,7 @@ var util   = require('util')
 // Send message (with timestamp) to stdout
 exports.log = log
 function log(data) {
+    if(_u.isObject(data)) data = JSON.stringify(data, null, '  ')
     console.log(new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' - ' + data)
 }
 
@@ -54,13 +55,5 @@ function md5(data) {
 // Get full uri
 exports.uri = uri
 function uri(req) {
-    return req.protocol + '://' + req.host + req.path
-}
-
-
-
-// Generate browser (user agent + ip) hash
-exports.browser_hash = browser_hash
-function browser_hash(req) {
-    return md5(req.headers['user-agent'] + req.ip)
+    return req.protocol + '://' + req.hostname + req.path
 }

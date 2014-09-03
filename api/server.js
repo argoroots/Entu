@@ -2,14 +2,14 @@
 
 require('newrelic')
 
-var _e      = require('./app/helper')
-var _u      = require('underscore')
+var _e         = require('./app/helper')
+var _u         = require('underscore')
 
-var async   = require('async')
-var express = require('express')
-var mongo   = require('mongodb')
-var nomnom  = require('nomnom')
-var session = require('cookie-session')
+var async      = require('async')
+var express    = require('express')
+var mongo      = require('mongodb')
+var nomnom     = require('nomnom')
+var session    = require('cookie-session')
 
 var entity     = require('./app/entity')
 var definition = require('./app/definition')
@@ -70,7 +70,7 @@ express()
                 port     : opts.port,
                 method   : req.method,
                 protocol : req.protocol,
-                host     : req.host,
+                host     : req.hostname,
                 path     : req.path,
                 query    : req.query,
                 body     : req.body,
@@ -83,16 +83,16 @@ express()
     })
     .use(function(req, res, next) { // Set customer preferences and DB connection to request
         req.entu = {}
-        if(_u.has(settings, req.host) && _u.has(dbs, req.host)) {
-            req.entu    = settings[req.host]
-            req.entu_db = dbs[req.host]
+        if(_u.has(settings, req.hostname) && _u.has(dbs, req.hostname)) {
+            req.entu    = settings[req.hostname]
+            req.entu_db = dbs[req.hostname]
             next()
         } else {
-            maindb.collection('entity').findOne({'property.domain': req.host}, function(err, item) {
-                if(err) return res.json(500, {error: err.message})
-                if(!item) return res.json(404, {error: 'No domain ' + req.host})
+            maindb.collection('entity').findOne({'property.domain': req.hostname}, function(err, item) {
+                if(err) return res.status(500).json({error: err.message})
+                if(!item) return res.status(404).json({error: 'Domain ' + req.hostname + ' is not configured'})
                 mongo.MongoClient.connect(item.property.mongodb[0], {server: {auto_reconnect: true}}, function(err, db) {
-                    req.entu = settings[req.host] = {
+                    req.entu = settings[req.hostname] = {
                         google_id       : item.property['auth-google'][0].split('\n')[0],
                         google_secret   : item.property['auth-google'][0].split('\n')[1],
                         facebook_id     : item.property['auth-facebook'][0].split('\n')[0],
@@ -100,7 +100,7 @@ express()
                         live_id         : item.property['auth-live'][0].split('\n')[0],
                         live_secret     : item.property['auth-live'][0].split('\n')[1],
                     }
-                    req.entu_db = dbs[req.host] = db
+                    req.entu_db = dbs[req.hostname] = db
                     next()
                     _e.log('connected to ' + item.property.mongodb)
                 })
@@ -108,30 +108,36 @@ express()
         }
     })
     .use(function(req, res, next) { // Set authenticated users id to request
-        req.entu_db.collection('session').findOne({'session': req.session.key, 'browser_hash': _e.browser_hash(req)}, {'_id':false, 'entity': true}, function(err, s) {
+        req.entu_db.collection('session').findOne({'_id': _e.object_id(req.session.id), 'ip': req.ip, 'browser': req.headers['user-agent']}, {'_id':false, 'entity': true}, function(err, s) {
             if(err) _e.error(err)
             if(!err && s) req.entu_user = s.entity
             next()
         })
     })
 
-    .get('/entity', entity.list)
-    .get('/entity/:id', entity.get)
 
-    .get('/definition', definition.list)
 
-    .get('/user', user.user)
-    .get('/auth/exit', user.logout)
-    .get('/auth/:provider', user.oauth2)
+    // URIs
+    .get('/api/entity', entity.list)
+    .get('/api/entity/:id', entity.get)
 
-    .get('*', function(req, res) { res.json(404, {error: '404'}) })
+    .get('/api/definition', definition.list)
 
+    .get('/api/user', user.user)
+    .get('/api/user/auth/:provider', user.oauth2)
+    .get('/api/user/exit', user.logout)
+
+    .get('*', function(req, res) { res.status(404).json({error: '404'}) })
+
+
+
+    // Start listening some port
     .listen(parseInt(opts.port))
 
 
 
 // Log all uncaught errors
-// process.on('uncaughtException', _e.error)
+process.on('uncaughtException', _e.error)
 
 
 
