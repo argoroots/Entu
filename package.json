@@ -13,7 +13,7 @@
   "bugs": {
     "url": "https://github.com/argoroots/Entu/issues?milestone=1"
   },
-  "engine": {
+  "engines": {
     "node": "*"
   },
   "dependencies": {
