@@ -14,9 +14,9 @@ exports.get = function(req, res) {
 
     var query  = {'_id': id}
     if(req.entu_user) {
-        query['$or'] = [{'rights.viewer': req.entu_user}, {'rights.sharing': {'$in': ['public', 'domain']}}]
+        query['$or'] = [{'_viewer': req.entu_user}, {'_sharing': {'$in': ['public', 'domain']}}]
     } else {
-        query['rights.sharing'] = 'public'
+        query['_sharing'] = 'public'
     }
 
     var fields = req.query.fields ? _u.object(req.query.fields.split(','), _u.map(req.query.fields.split(','), function(field){ return true })) : {}
@@ -50,18 +50,18 @@ exports.list = function(req, res) {
     var limit  = parseInt(req.query.limit) ? parseInt(req.query.limit) : 100
     var skip   = parseInt(req.query.page)  ? (parseInt(req.query.page) - 1) * limit  : 0
 
-    if(req.query.definition) query['definition'] = req.query.definition
+    if(req.query.definition) query['_definition'] = req.query.definition
     if(req.query.query) {
         var q = []
         _u.each(_u.uniq(req.query.query.toLowerCase().split(' ')), function(s) {
             q.push(new RegExp(s, 'i'))
         })
-        query['search.et'] = {'$all': q}
+        query['_search.et'] = {'$all': q}
     }
     if(req.entu_user) {
-        query['$or'] = [{'rights.viewer': req.entu_user}, {'rights.sharing': {'$in': ['public', 'domain']}}]
+        query['$or'] = [{'_viewer': req.entu_user}, {'_sharing': {'$in': ['public', 'domain']}}]
     } else {
-        query['rights.sharing'] = 'public'
+        query['_sharing'] = 'public'
     }
 
     async.series({

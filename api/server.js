@@ -15,6 +15,8 @@ var entity     = require('./app/entity')
 var definition = require('./app/definition')
 var user       = require('./app/user')
 
+var startup    = new Date().toISOString()
+
 
 
 // Parse (and require) commandline arguments
@@ -88,22 +90,26 @@ express()
             req.entu_db = dbs[req.hostname]
             next()
         } else {
-            maindb.collection('entity').findOne({'property.domain': req.hostname}, function(err, item) {
+            maindb.collection('entity').findOne({'domain': req.hostname}, function(err, item) {
                 if(err) return res.status(500).json({error: err.message})
                 if(!item) return res.status(404).json({error: 'Domain ' + req.hostname + ' is not configured'})
-                mongo.MongoClient.connect(item.property.mongodb[0], {server: {auto_reconnect: true}}, function(err, db) {
-                    req.entu = settings[req.hostname] = {
-                        google_id       : item.property['auth-google'][0].split('\n')[0],
-                        google_secret   : item.property['auth-google'][0].split('\n')[1],
-                        facebook_id     : item.property['auth-facebook'][0].split('\n')[0],
-                        facebook_secret : item.property['auth-facebook'][0].split('\n')[1],
-                        live_id         : item.property['auth-live'][0].split('\n')[0],
-                        live_secret     : item.property['auth-live'][0].split('\n')[1],
-                    }
-                    req.entu_db = dbs[req.hostname] = db
-                    next()
-                    _e.log('connected to ' + item.property.mongodb)
-                })
+                try {
+                    mongo.MongoClient.connect(item.mongodb[0], {server: {auto_reconnect: true}}, function(err, db) {
+                        req.entu = settings[req.hostname] = {
+                            google_id       : item['auth-google'][0].split('\n')[0],
+                            google_secret   : item['auth-google'][0].split('\n')[1],
+                            facebook_id     : item['auth-facebook'][0].split('\n')[0],
+                            facebook_secret : item['auth-facebook'][0].split('\n')[1],
+                            live_id         : item['auth-live'][0].split('\n')[0],
+                            live_secret     : item['auth-live'][0].split('\n')[1],
+                        }
+                        req.entu_db = dbs[req.hostname] = db
+                        next()
+                        _e.log('connected to ' + item.mongodb)
+                    })
+                } catch(err) {
+                    return res.status(500).json({error: 'Domain ' + req.hostname + ' is not configured correctly'})
+                }
             })
         }
     })
@@ -126,6 +132,47 @@ express()
     .get('/api/user', user.user)
     .get('/api/user/auth/:provider', user.oauth2)
     .get('/api/user/exit', user.logout)
+
+    .get('/api', function(req, res) {
+        res.json({
+            info: 'Entu API',
+            version: '3.0.0',
+            urls: [
+                {
+                    url: '/api/entity',
+                    params: [
+                        'query',
+                        'fields',
+                        'limit',
+                        'skip',
+                    ],
+                },
+                {
+                    url: '/api/entity/:id',
+                    params: [
+                        'fields'
+                    ],
+                },
+                {
+                    url: '/api/user',
+                    info: 'Returns user info'
+                },
+                {
+                    url: '/api/user/auth/:provider',
+                    params: [
+                        'next'
+                    ],
+                },
+                {
+                    url: '/api/user/exit',
+                    params: [
+                        'next'
+                    ],
+                },
+            ],
+            'started': startup,
+        })
+    })
 
     .get('*', function(req, res) { res.status(404).json({error: '404'}) })
 

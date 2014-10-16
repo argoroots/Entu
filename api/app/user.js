@@ -92,8 +92,8 @@ exports.oauth2 = function(req, res) {
                 user.user = provider.parse_user(JSON.parse(body))
                 if(!user.user.email) return callback(new Error('No email from provider'))
 
-                // req.entu_db.collection('entity').findOne({'property.entu-user': user.id + '@' + user.provider}, callback)
-                req.entu_db.collection('entity').findOne({'property.user': user.user.email}, {'_id': true}, callback)
+                // req.entu_db.collection('entity').findOne({'entu-user': user.id + '@' + user.provider}, callback)
+                req.entu_db.collection('entity').findOne({'user': user.user.email}, {'_id': true}, callback)
             },
             function(item, callback) {
                 if(!item) return callback(new Error('No match for ' + user.user.email))
