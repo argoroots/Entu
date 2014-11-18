@@ -84,8 +84,11 @@ exports.oauth2 = function(req, res) {
                 }}, callback)
             },
             function(response, body, callback) {
+                var token = provider.response_parser(body).access_token
+                if(!token) return callback(new Error('No access token from provider'))
+
                 request.get({strictSSL: true, url: provider.url.user + '?' + querystring.stringify({
-                    access_token: provider.response_parser(body).access_token,
+                    access_token: token,
                 })}, callback)
             },
             function(response, body, callback) {

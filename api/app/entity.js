@@ -14,12 +14,14 @@ exports.get = function(req, res) {
 
     var query  = {'_id': id}
     if(req.entu_user) {
-        query['$or'] = [{'_viewer': req.entu_user}, {'_sharing': {'$in': ['public', 'domain']}}]
+        query['$or'] = [{'_rights.viewer._id': req.entu_user}, {'_rights.sharing': {'$in': ['public', 'domain']}}]
     } else {
-        query['_sharing'] = 'public'
+        query['_rights.sharing'] = 'public'
     }
 
     var fields = req.query.fields ? _u.object(req.query.fields.split(','), _u.map(req.query.fields.split(','), function(field){ return true })) : {}
+
+    fields['_search'] = false
 
     async.waterfall([
         function(callback) {
@@ -35,7 +37,7 @@ exports.get = function(req, res) {
 
         res.json({
             query: query,
-            fields: _u.keys(fields),
+            fields: fields,
             result: entity,
         })
     })
@@ -46,9 +48,11 @@ exports.get = function(req, res) {
 //Return list of entities
 exports.list = function(req, res) {
     var query  = {}
-    var fields = req.query.fields ? _u.object(req.query.fields.split(','), _u.map(req.query.fields.split(','), function(field){ return true })) : {}
     var limit  = parseInt(req.query.limit) ? parseInt(req.query.limit) : 100
     var skip   = parseInt(req.query.page)  ? (parseInt(req.query.page) - 1) * limit  : 0
+    var fields = req.query.fields ? _u.object(req.query.fields.split(','), _u.map(req.query.fields.split(','), function(field){ return true })) : {}
+
+    fields['_search'] = false
 
     if(req.query.definition) query['_definition'] = req.query.definition
     if(req.query.query) {
@@ -59,9 +63,9 @@ exports.list = function(req, res) {
         query['_search.et'] = {'$all': q}
     }
     if(req.entu_user) {
-        query['$or'] = [{'_viewer': req.entu_user}, {'_sharing': {'$in': ['public', 'domain']}}]
+        query['$or'] = [{'_rights.viewer._id': req.entu_user}, {'_rights.sharing': {'$in': ['public', 'domain']}}]
     } else {
-        query['_sharing'] = 'public'
+        query['_rights.sharing'] = 'public'
     }
 
     async.series({
@@ -79,11 +83,15 @@ exports.list = function(req, res) {
 
         res.json({
             query: query,
-            fields: _u.keys(fields),
+            fields: fields,
             skip: skip,
             limit: limit,
             count: results.count,
-            explain: results.explain,
+            explain: {
+                cursor: results.explain.cursor,
+                millis: results.explain.millis,
+                nscanned: results.explain.nscanned,
+            },
             result: results.items,
         })
     })
