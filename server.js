@@ -141,41 +141,87 @@ express()
     .get('/api', function(req, res) {
         res.json({
             info: 'Entu API',
-            version: '3.0.0',
-            urls: [
-                {
-                    url: '/api/entity',
-                    params: [
-                        'query',
-                        'fields',
-                        'limit',
-                        'skip',
-                    ],
+            started: startup,
+            GET: {
+                '/api/entity': {
+                    info: 'Returns entity list.',
+                    query_params: {
+                        definition: {
+                            info: 'Entity definition ID or keyname',
+                            type: 'string',
+                            required: false
+                        },
+                        query: {
+                            info: 'Search criteria',
+                            type: 'string',
+                            required: false
+                        },
+                        fields: {
+                            info: 'Commaseparated list of fields. If not set all fields are returned.',
+                            type: 'string',
+                            required: false
+                        },
+                        limit: {
+                            info: 'Number of entities to return.',
+                            type: 'integer',
+                            required: false,
+                            default: 100
+                        },
+                        skip: {
+                            info: 'Number of entities to skip.',
+                            type: 'string',
+                            required: false,
+                            default: 0
+                        }
+                    }
                 },
-                {
-                    url: '/api/entity/:id',
-                    params: [
-                        'fields'
-                    ],
+                '/api/entity/:id': {
+                    info: 'Returns entity with given ID.',
+                    path_params: {
+                        id: {
+                            info: 'Entity ID',
+                            type: 'string',
+                            required: true
+                        }
+                    },
+                    query_params: {
+                        fields: {
+                            info: 'Commaseparated list of fields. If not set all fields are returned.',
+                            type: 'string',
+                            required: false
+                        }
+                    }
                 },
-                {
-                    url: '/api/user',
-                    info: 'Returns user info'
+                '/api/user': {
+                    info: 'Returns user info.',
                 },
-                {
-                    url: '/api/user/auth/:provider',
-                    params: [
-                        'next'
-                    ],
+                '/api/user/auth/:provider': {
+                    info: 'Log in user with given authentication provider.',
+                    path_params: {
+                        provider: 'Authentication provider: google, facebook or live.'
+                    },
+                    query_params: {
+                        next: 'STRING (optional) - Redirects to this url after login.'
+                    }
                 },
-                {
-                    url: '/api/user/exit',
-                    params: [
-                        'next'
-                    ],
-                },
-            ],
-            'started': startup,
+                '/api/user/exit': {
+                    info: 'Log out (destroy user session) and redirect to url in "next" parameter (if set).',
+                    query_params: {
+                        next: 'STRING (optional) - Redirects to this url after logout.'
+                    }
+                }
+            },
+            POST: {
+                '/api/entity/:id': {
+                    info: 'Create new entity under entity with given ID.',
+                    path_params: {
+                        id: 'STRING (mandatory) - Entity ID.'
+                    },
+                    query_params: {
+                        next: 'STRING (optional) - Redirects to this url after logout.'
+                    }
+                }
+            }
         })
     })
 
