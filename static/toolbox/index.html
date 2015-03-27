@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Mihkel Putrinš">
+        <link rel="shortcut icon" href="images/favicon.ico">
+
+        <title>Entu Toolbox</title>
+        <!-- Bootstrap core CSS -->
+        <link href="lib/bootstrap-3.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom styles for this template -->
+        <link href="stylesheets/template.css" rel="stylesheet">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+    </head>
+
+    <body class="modal-body">
+
+        <div id="container" class="container col-xs-12">
+
+            <div class="row">
+                <label for="user_email" class="control-label col-md-2">User</label>
+                <div id="user_email" class="col-md-10"> ...fetching user... <i class="fa fa-circle-o-notch fa-spin"></i></div>
+            </div>
+
+            <div class="row">
+                <label for="timeframe" class="control-label col-md-2"><span id="history_count">Loading</span> events</label>
+                <div id="timeframe" class="col-md-10">between <span id="from_ts"><i class="fa fa-circle-o-notch fa-spin"></i></span> and <span id="to_ts"><i class="fa fa-circle-o-notch fa-spin"></i></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div id="requestlog" class="container col-xs-12">
+                    <i class="fa fa-circle-o-notch fa-spin"></i> ...requestlog...
+                </div>
+            </div>
+
+            <div class="row">
+                <div id="history" class="container col-xs-12">
+                    <i class="fa fa-circle-o-notch fa-spin"></i> ...history...
+                </div>
+            </div>
+
+            <nav>
+              <ul class="pager">
+                <!-- <li id="back_to_groups_btn" class="hide"><a href="#">Tagasi</a></li> -->
+                <li id="load_more_history_btn" class="hide"><a href="#">Load more</a></li>
+              </ul>
+            </nav>
+        </div><!-- /.container -->
+
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="lib/bootstrap-3.3.2-dist/js/bootstrap.min.js"></script>
+        <script src="lib/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script>
+        <script src="javascripts/main.js"></script>
+    </body>
+</html>

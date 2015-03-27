@@ -1,0 +1,49 @@
+body {
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+div.CB {
+}
+div.CB > label {
+    width: 100%;
+}
+div.CB > label:hover {
+    width: 100%;
+    background-color: lightgray;
+}
+div.CB > label > input[type=checkbox] {
+  margin: 0.5em;
+}
+
+.pager > li.show, .card.show {
+    visibility: visible;
+}
+.pager > li.hide, .card.hide {
+    visibility: hidden;
+}
+
+.form_datetime > input {
+  /*width: 100%;*/
+}
+
+#login_frame {
+  /*position: fixed;*/
+  top : 0px;
+  height: 500px;
+  width: 200px;
+}
+
+.group.header {
+  background-color: gray;
+  font-weight: bold;
+  padding: 0.5em;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  color: white;
+  border-radius: 0.5em;
+}
+
