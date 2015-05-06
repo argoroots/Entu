@@ -13,7 +13,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && ech
 RUN apt-get update && apt-get install -y mongodb-org
 
 # Create the MongoDB data directory
-# RUN mkdir -p /data/db
+RUN mkdir -p /data/db
 
 # Expose port #27017 from the container to the host
 EXPOSE 27017
