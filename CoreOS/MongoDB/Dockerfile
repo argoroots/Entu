@@ -2,7 +2,7 @@
 # Dockerfile to build MongoDB container images for Entu
 ############################################################
 
-FROM ubuntu:14.04
+FROM debian:stable
 
 MAINTAINER Argo Roots <argo@roots.ee>
 
