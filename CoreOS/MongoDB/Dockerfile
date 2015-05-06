@@ -2,7 +2,7 @@
 # Dockerfile to build MongoDB container images for Entu
 ############################################################
 
-FROM debian:stable
+FROM debian:latest
 
 MAINTAINER Argo Roots <argo@roots.ee>
 
@@ -14,7 +14,6 @@ RUN apt-get update && apt-get install -y mongodb-org
 
 # Create the MongoDB data directory
 RUN mkdir -p /data/db
-VOLUME /data/db
 
 # Expose port #27017 from the container to the host
 EXPOSE 27017
