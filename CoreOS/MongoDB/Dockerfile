@@ -10,7 +10,7 @@ MAINTAINER Argo Roots <argo@roots.ee>
 ENV NEW_RELIC_LICENSE_KEY YOUR_LICENSE_KEY
 
 # Configure the New Relic apt repository and trust the New Relic GPG key
-RUN echo deb http://apt.newrelic.com/debian/ newrelic non-free >> /etc/apt/sources.list.d/newrelic.list && wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -
+RUN echo "deb http://apt.newrelic.com/debian/ newrelic non-free" >> /etc/apt/sources.list.d/newrelic.list && wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -
 
 # Import MongoDB public GPG key and create a MongoDB list file
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list
