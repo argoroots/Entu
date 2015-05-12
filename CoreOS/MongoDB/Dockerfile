@@ -8,6 +8,7 @@ MAINTAINER Argo Roots <argo@roots.ee>
 
 # Set New Relic license key
 ENV NEW_RELIC_LICENSE_KEY YOUR_LICENSE_KEY
+ENV NEW_RELIC_HOSTNAME YOUR_HOSTNAME
 
 # Update apt-get sources and install wget
 RUN apt-get update && apt-get install -y wget
@@ -20,6 +21,9 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && ech
 
 # Update apt-get sources and install MongoDB and New Relic monitor
 RUN apt-get update && apt-get install -y mongodb-org newrelic-sysmond
+
+# Set New Relic loglevel and hostname
+RUN nrsysmond-config --set loglevel=error && nrsysmond-config --set hostname=$NEW_RELIC_HOSTNAME
 
 # Expose port #27017 from the container to the host
 EXPOSE 27017
