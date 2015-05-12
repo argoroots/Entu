@@ -1,0 +1,35 @@
+[Unit]
+Description=Entu MongoDB replicaset
+After=etcd.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/mkdir -p /data/mongodb
+ExecStartPre=-/usr/bin/docker kill mongodb
+ExecStartPre=-/usr/bin/docker rm mongodb
+ExecStartPre=/usr/bin/docker pull argoroots/entu-mongodb:latest
+ExecStart=/usr/bin/docker run \
+          --name="mongodb" \
+          --hostname="${COREOS_PRIVATE_IPV4}" \
+          --volume="/data/mongodb:/data/db" \
+          --volume="/data/ssl/mongodb/:/data/ssl" \
+          --publish="${COREOS_PRIVATE_IPV4}:27017:27017" \
+          argoroots/entu-mongodb \
+              --dbpath /data/db \
+              --storageEngine wiredTiger \
+              --directoryperdb \
+              --sslMode requireSSL \
+              --sslPEMKeyFile /data/ssl/server.pem \
+              --sslCAFile /data/ssl/ca.pem \
+              --sslAllowInvalidHostnames \
+              --replSet entu
+ExecStop=/usr/bin/docker stop mongodb
+
+[X-Fleet]
+Global=true
+X-ConditionMachineMetadata=db=true
+X-ConditionMachineMetadata=provider=digitalocean
+X-ConditionMachineMetadata=region=ams3
