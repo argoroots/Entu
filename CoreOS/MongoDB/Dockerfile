@@ -23,7 +23,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && ech
 RUN apt-get update && apt-get install -y mongodb-org newrelic-sysmond
 
 # Set New Relic loglevel and hostname
-RUN nrsysmond-config --set loglevel=error && nrsysmond-config --set hostname=$NEW_RELIC_HOSTNAME
+RUN nrsysmond-config --set loglevel=error && echo "\n\nhostname="$NEW_RELIC_HOSTNAME >> /etc/nrsysmond.cfg
 
 # Expose port #27017 from the container to the host
 EXPOSE 27017
