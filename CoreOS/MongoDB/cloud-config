@@ -1,0 +1,129 @@
+#cloud-config
+
+coreos:
+  etcd:
+    discovery: https://discovery.etcd.io/<<ETCD_REGISTRY_KEY>>
+    addr: $private_ipv4:4001
+    peer-addr: $private_ipv4:7001
+  fleet:
+    public-ip: $private_ipv4
+    metadata: db=true,app=true,provider=digitalocean,region=ams3,public_ip=$public_ipv4
+  units:
+    - name: etcd.service
+      command: start
+    - name: fleet.service
+      command: start
+    - name: iptables-restore.service
+      enable: true
+write_files:
+  - path: /var/lib/iptables/rules-save
+    permissions: 0644
+    owner: root:root
+    content: |
+      *filter
+      :INPUT DROP [0:0]
+      :FORWARD DROP [0:0]
+      :OUTPUT ACCEPT [0:0]
+      -A INPUT -i lo -j ACCEPT
+      -A INPUT -i eth1 -j ACCEPT
+      -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
+      COMMIT
+  - path: /data/services/newrelic.service
+    permissions: 0644
+    owner: core:core
+    content: |
+      [Unit]
+      Description=New Relic System Monitor (nrsysmond)
+      After=etcd.service
+      After=docker.service
+
+      [Service]
+      TimeoutStartSec=10m
+      ExecStartPre=-/usr/bin/docker kill newrelic
+      ExecStartPre=-/usr/bin/docker rm newrelic
+      ExecStartPre=/usr/bin/docker pull newrelic/nrsysmond:latest
+      ExecStart=/usr/bin/docker run \
+                --name="newrelic" \
+                --volume="/proc:/proc" \
+                --volume="/sys:/sys" \
+                --volume="/dev:/dev" \
+                --privileged=true \
+                --net="host" \
+                --env="NRSYSMOND_license_key=<<NEW_RELIC_LICENSE_KEY>>" \
+                --env="NRSYSMOND_loglevel=info" \
+                --env="NRSYSMOND_hostname=%H" \
+                newrelic/nrsysmond:latest
+      ExecStop=/usr/bin/docker stop -t 30 newrelic
+
+      [Install]
+      WantedBy=multi-user.target
+
+      [X-Fleet]
+      Global=true
+  - path: /data/services/mongodb.service
+    permissions: 0644
+    owner: core:core
+    content: |
+      [Unit]
+      Description=Entu MongoDB replicaset
+      After=etcd.service
+      After=docker.service
+
+      [Service]
+      TimeoutStartSec=0
+      KillMode=none
+      EnvironmentFile=/etc/environment
+      ExecStartPre=-/usr/bin/mkdir -p /data/mongodb
+      ExecStartPre=-/usr/bin/docker kill mongodb
+      ExecStartPre=-/usr/bin/docker rm mongodb
+      ExecStartPre=/usr/bin/docker pull argoroots/entu-mongodb:latest
+      ExecStart=/usr/bin/docker run \
+                --name="mongodb" \
+                --hostname="${COREOS_PRIVATE_IPV4}" \
+                --volume="/data/mongodb:/data/db" \
+                --volume="/data/ssl/mongodb/:/data/ssl" \
+                --publish="${COREOS_PRIVATE_IPV4}:27017:27017" \
+                argoroots/entu-mongodb \
+                    --dbpath /data/db \
+                    --storageEngine wiredTiger \
+                    --directoryperdb \
+                    --sslMode requireSSL \
+                    --sslPEMKeyFile /data/ssl/server.pem \
+                    --sslCAFile /data/ssl/ca.pem \
+                    --sslAllowInvalidHostnames \
+                    --replSet entu
+      ExecStop=/usr/bin/docker stop mongodb
+
+      [X-Fleet]
+      Global=true
+      X-ConditionMachineMetadata=db=true
+      X-ConditionMachineMetadata=provider=digitalocean
+      X-ConditionMachineMetadata=region=ams3
+  - path: /data/ssl/mongodb/ca.pem
+    permissions: 0644
+    owner: root:root
+    content: |
+      -----BEGIN CERTIFICATE-----
+      -----END CERTIFICATE-----
+  - path: /data/ssl/mongodb/server.pem
+    permissions: 0644
+    owner: root:root
+    content: |
+      -----BEGIN RSA PRIVATE KEY-----
+      -----END RSA PRIVATE KEY-----
+      -----BEGIN CERTIFICATE-----
+      -----END CERTIFICATE-----
+  - path: /data/ssl/mongodb/client.pem
+    permissions: 0644
+    owner: root:root
+    content: |
+      -----BEGIN RSA PRIVATE KEY-----
+      -----END RSA PRIVATE KEY-----
+      -----BEGIN CERTIFICATE-----
+      -----END CERTIFICATE-----
