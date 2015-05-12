@@ -6,27 +6,14 @@ FROM ubuntu:14.04
 
 MAINTAINER Argo Roots <argo@roots.ee>
 
-# Set New Relic license key
-ENV NEW_RELIC_LICENSE_KEY YOUR_LICENSE_KEY
-ENV NEW_RELIC_HOSTNAME YOUR_HOSTNAME
-
-# Update apt-get sources and install wget
-RUN apt-get update && apt-get install -y wget
-
-# Configure the New Relic apt repository and trust the New Relic GPG key
-RUN echo deb http://apt.newrelic.com/debian/ newrelic non-free >> /etc/apt/sources.list.d/newrelic.list && wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -
-
-# Import MongoDB public GPG key and create a MongoDB list file
+# Import MongoDB public GPG key AND create a MongoDB list file
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list
 
-# Update apt-get sources and install MongoDB and New Relic monitor
-RUN apt-get update && apt-get install -y mongodb-org newrelic-sysmond
-
-# Set New Relic loglevel and hostname
-RUN nrsysmond-config --set loglevel=error && echo "\n\nhostname="$NEW_RELIC_HOSTNAME >> /etc/nrsysmond.cfg
+# Update apt-get sources AND install MongoDB
+RUN apt-get update && apt-get install -y mongodb-org
 
 # Expose port #27017 from the container to the host
 EXPOSE 27017
 
-# Add New Relic license key to config file, start the New Relic daemon and start /usr/bin/mongod as dockerized entry-point application
-ENTRYPOINT nrsysmond-config --set license_key=$NEW_RELIC_LICENSE_KEY && /etc/init.d/newrelic-sysmond start && /usr/bin/mongod
+# Set /usr/bin/mongod as the dockerized entry-point application
+ENTRYPOINT ["/usr/bin/mongod"]
