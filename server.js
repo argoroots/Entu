@@ -135,6 +135,7 @@ express()
     .get('/api/definition', definition.list)
 
     .get('/api/user', user.user)
+    .get('/api/user/test', user.test)
     .get('/api/user/auth/:provider', user.oauth2)
     .get('/api/user/exit', user.logout)
 

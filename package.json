@@ -3,7 +3,7 @@
   "description": "Futuristic Data Management System",
   "version": "0.0.1",
   "author": "Argo Roots",
-  "main": "./api/server.js",
+  "main": "server.js",
   "license": "MIT",
   "private": true,
   "repository": {
@@ -23,6 +23,8 @@
     "express": "*",
     "mongodb": "*",
     "newrelic": "*",
+    "nodemailer": "*",
+    "nodemailer-ses-transport": "*",
     "nomnom": "*",
     "querystring": "*",
     "request": "*",

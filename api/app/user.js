@@ -1,9 +1,11 @@
 var _e = require('./helper')
 var _u = require('underscore')
 
-var async       = require('async')
-var querystring = require('querystring')
-var request     = require('request')
+var async          = require('async')
+var querystring    = require('querystring')
+var request        = require('request')
+var nodemailer     = require('nodemailer')
+var nodemailer_ses = require('nodemailer-ses-transport')
 
 
 
@@ -150,4 +152,36 @@ exports.user = function(req, res) {
 
         res.json({ result: item })
     })
+}
+
+
+
+// Return authenticated users entity
+exports.test = function(req, res) {
+
+    var transporter = nodemailer.createTransport(nodemailer_ses({
+        accessKeyId: 'AWS_KEY',
+        secretAccessKey: 'AWS_SECRET',
+        region: 'eu-west-1',
+        rateLimit: 1
+    }))
+
+    var mailOptions = {
+        from: 'Entu <no-reply@entu.ee>',
+        to: ['argo.roots@hitsa.ee', 'argo@roots.ee'],
+        replyTo: {
+            name: 'Mina siin',
+            address: 'argo@arx.ee'
+        },
+        subject: 'Hello ✔',
+        text: 'Hello world ✔',
+        html: '<b>Hello world ✔</b>',
+    }
+
+    // send mail with defined transport object
+    transporter.sendMail(mailOptions, function(err, info){
+        if(err) return res.status(500).json({ error: err.message })
+        res.json({result: info})
+    })
+
 }
