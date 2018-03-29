@@ -9,7 +9,7 @@
             <tr>
                 <td colspan="2" style="vertical-align:middle; text-align:center; padding-bottom:5px;">
                     <h4 style="margin-bottom:0px;">
-                        <img src="/api2/entity-{{ current_user.get('id') }}/picture" class="img-rounded" style="height:120px; width:120px; margin-bottom:5px;" ><br />
+                        <img src="https://api.entu.ee/2/{{ app_organisation_id }}/picture/{{ current_user.get('id') }}" class="img-rounded" style="height:120px; width:120px; margin-bottom:5px;" ><br />
                         {{ current_user.get('name') }}<br />
                     </h4>
                     <span style="color:gray;">{{ current_user.get('email') }} ({{ current_user.get('provider') }})</span>

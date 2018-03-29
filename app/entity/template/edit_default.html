@@ -260,7 +260,7 @@
                     } else {
                         info = '';
                     };
-                    return '<div class="select2-result-item"><img src="/api2/entity-'+data.id+'/picture" />'+data.name+info+'<div>';
+                    return '<div class="select2-result-item"><img src="https://api.entu.ee/2/{{ app_organisation_id }}/picture/'+data.id+'" />'+data.name+info+'<div>';
                 },
                 formatSelection: function(data) {
                     return data.name;

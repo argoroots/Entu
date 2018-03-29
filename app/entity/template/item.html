@@ -23,7 +23,7 @@
 {% end %}
 
 <div class="pull-right" style="margin:0px 0px 20px 0px; width:120px; color:#B9B9B9; ">
-    <img src="/api2/entity-{{ entity.get('id') }}/picture" id="entity_picture" class="" width="120" style="padding-bottom:4px; width:120px;" />
+    <img src="https://api.entu.ee/2/{{ app_organisation_id }}/picture/{{ entity.get('id') }}" id="entity_picture" class="" width="120" style="padding-bottom:4px; width:120px;" />
     <br />
     <br />
     <strong style="text-transform:uppercase;">{{ entity['label'] }}</strong>
@@ -227,7 +227,7 @@
                         if(definition.entities[tr_key].table) {
                             var $td = $tr.children('.childs-td-template').clone(true).removeClass('childs-td-template').appendTo($tr);
                             $td.attr('data-value', definition.entities[tr_key].id);
-                            $td.children('a').html('<img src="/api2/entity-' + definition.entities[tr_key].id + '/picture" style="height:25px; max-width:25px;" />');
+                            $td.children('a').html('<img src="https://api.entu.ee/2/{{ app_organisation_id }}/picture/' + definition.entities[tr_key].id + '" style="height:25px; max-width:25px;" />');
                             $td.children('a').attr('href', '#'+definition.entities[tr_key].id);
                             $td.attr('style', 'width: 25px;');
 
@@ -240,7 +240,7 @@
                         } else {
                             var $td = $tr.children('.childs-td-template').clone(true).removeClass('childs-td-template').appendTo($tr);
                             $td.attr('data-value', definition.entities[tr_key].name);
-                            $td.children('a').html('<img src="/api2/entity-' + definition.entities[tr_key].id + '/picture" style="height:25px; max-width:25px; margin-right:5px; " />' + definition.entities[tr_key].name);
+                            $td.children('a').html('<img src="https://api.entu.ee/2/{{ app_organisation_id }}/picture/' + definition.entities[tr_key].id + '" style="height:25px; max-width:25px; margin-right:5px; " />' + definition.entities[tr_key].name);
                             $td.children('a').attr('href', '#'+definition.entities[tr_key].id);
                         }
 
