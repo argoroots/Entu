@@ -90,7 +90,7 @@
                     $element.attr('href', '#'+data.result[e_key].id);
                     $element.children('span').before(data.result[e_key].name);
                     $element.children('span').html(data.result[e_key].info);
-                    $element.children('img').attr('src', '/api2/entity-'+data.result[e_key].id+'/picture');
+                    $element.children('img').attr('src', 'https://api.entu.ee/2/{{ app_organisation_id }}/picture/'+data.result[e_key].id);
                     $element.show();
                 }
 
